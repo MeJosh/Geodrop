@@ -85,7 +85,7 @@ export class MainScene extends Phaser.Scene {
     const instructions = this.add.text(
       this.cameras.main.centerX,
       100,
-      'Arrow Keys / WASD: Move & Jump\nHold Direction: Mine Tiles\nWorld Seed: ' +
+      'Arrow Keys / WASD: Move & Jump\nClick/Tap & Hold: Move & Mine\nWorld Seed: ' +
         this.generationSystem.getSeed(),
       {
         fontSize: '16px',
@@ -99,18 +99,19 @@ export class MainScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
-    // Get input
-    if (!this.inputSystem) return;
-    const input = this.inputSystem.getInput();
+    // Get player position first for input calculation
+    if (!this.inputSystem || !this.playerSystem) return;
+
+    const playerPos = this.playerSystem.getCenterPosition();
+
+    // Get input (now with player position for touch/mouse controls)
+    const input = this.inputSystem.getInput(playerPos.x, playerPos.y);
 
     // Update player with input
-    if (this.playerSystem) {
-      this.playerSystem.update(input);
-    }
+    this.playerSystem.update(input);
 
     // Update mining system
-    if (this.miningSystem && this.playerSystem) {
-      const playerPos = this.playerSystem.getCenterPosition();
+    if (this.miningSystem) {
       const playerState = this.playerSystem.getState();
       this.miningSystem.update(input, playerPos.x, playerPos.y, playerState.isGrounded, delta);
     }
