@@ -350,17 +350,39 @@ export class TextureGenerator {
     const oreDarkColor = 0xffaa00;
 
     nuggetPositions.forEach((pos, index) => {
-      // Create slightly irregular oval shapes with larger base size
-      const radiusX = 4 + (((index * 7 + variation * 11) % 10) / 10) * 3;
-      const radiusY = 4 + (((index * 13 + variation * 17) % 10) / 10) * 3;
+      let sizeX: number;
+      let sizeY: number;
 
-      // Draw main nugget
+      // For 2-nugget variations, make one larger and one smaller
+      if (nuggetCount === 2) {
+        if (index === 0) {
+          // First nugget is 80% larger (7-10 pixels)
+          sizeX = 7 + (((index * 7 + variation * 11) % 10) / 10) * 3;
+          sizeY = 7 + (((index * 13 + variation * 17) % 10) / 10) * 3;
+        } else {
+          // Second nugget is smaller (3-4 pixels)
+          sizeX = 3 + (((index * 7 + variation * 11) % 10) / 10) * 1;
+          sizeY = 3 + (((index * 13 + variation * 17) % 10) / 10) * 1;
+        }
+      } else {
+        // For 3-nugget variations, keep current size (4-6 pixels)
+        sizeX = 4 + (((index * 7 + variation * 11) % 10) / 10) * 2;
+        sizeY = 4 + (((index * 13 + variation * 17) % 10) / 10) * 2;
+      }
+
+      // Draw main nugget (square)
       graphics.fillStyle(oreColor);
-      graphics.fillEllipse(pos.x, pos.y, radiusX, radiusY);
+      graphics.fillRect(pos.x - sizeX / 2, pos.y - sizeY / 2, sizeX, sizeY);
 
       // Add darker center for depth
       graphics.fillStyle(oreDarkColor, 0.5);
-      graphics.fillEllipse(pos.x, pos.y, radiusX * 0.6, radiusY * 0.6);
+      const centerSize = 0.5;
+      graphics.fillRect(
+        pos.x - (sizeX * centerSize) / 2,
+        pos.y - (sizeY * centerSize) / 2,
+        sizeX * centerSize,
+        sizeY * centerSize
+      );
     });
   }
 
@@ -374,9 +396,9 @@ export class TextureGenerator {
   ): { x: number; y: number }[] {
     const positions: { x: number; y: number }[] = [];
     const minDistanceFromEdge = size * 0.2; // Keep nuggets at least 20% from edge
-    const minDistanceBetween = size * 0.3; // Keep nuggets at least 30% apart
+    const minDistanceBetween = size * 0.25; // Keep nuggets at least 25% apart
 
-    // Create a grid-based approach with random offsets for even distribution
+    // Create a grid-based approach with much larger random offsets for less regular appearance
     const gridSize = Math.ceil(Math.sqrt(count));
     const cellSize = (size - 2 * minDistanceFromEdge) / gridSize;
 
@@ -387,22 +409,33 @@ export class TextureGenerator {
         const baseX = minDistanceFromEdge + i * cellSize + cellSize / 2;
         const baseY = minDistanceFromEdge + j * cellSize + cellSize / 2;
 
-        // Add random offset within cell (using variation for deterministic randomness)
-        const offsetX = ((nuggetIndex * 7 + variation * 11) % 100 - 50) / 100 * cellSize * 0.4;
-        const offsetY = ((nuggetIndex * 13 + variation * 17) % 100 - 50) / 100 * cellSize * 0.4;
+        // Add much larger random offset within cell (using variation for deterministic randomness)
+        // Increased offset range from 0.4 to 0.8 for more randomness
+        const offsetX = ((nuggetIndex * 7 + variation * 11) % 100 - 50) / 100 * cellSize * 0.8;
+        const offsetY = ((nuggetIndex * 13 + variation * 17) % 100 - 50) / 100 * cellSize * 0.8;
 
         const x = baseX + offsetX;
         const y = baseY + offsetY;
 
-        // Check if position is valid (not too close to other nuggets)
+        // Check if position is valid (not too close to other nuggets or edges)
         let validPosition = true;
-        for (const existingPos of positions) {
-          const distance = Math.sqrt(
-            Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
-          );
-          if (distance < minDistanceBetween) {
-            validPosition = false;
-            break;
+
+        // Check distance from edges
+        if (x < minDistanceFromEdge || x > size - minDistanceFromEdge ||
+            y < minDistanceFromEdge || y > size - minDistanceFromEdge) {
+          validPosition = false;
+        }
+
+        // Check distance from other nuggets
+        if (validPosition) {
+          for (const existingPos of positions) {
+            const distance = Math.sqrt(
+              Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
+            );
+            if (distance < minDistanceBetween) {
+              validPosition = false;
+              break;
+            }
           }
         }
 
