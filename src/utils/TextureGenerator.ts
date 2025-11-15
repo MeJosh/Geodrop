@@ -1,12 +1,51 @@
 import Phaser from 'phaser';
 import { TileType, TileRegistry } from '@/config/tiles';
 import { WorldConfig } from '@/config/world';
+import { PlayerConfig } from '@/config/player';
 
 /**
  * Generates placeholder tileset textures programmatically
  * Used until we have actual sprite assets
  */
 export class TextureGenerator {
+  /**
+   * Generate player sprite texture
+   */
+  static generatePlayerSprite(scene: Phaser.Scene): void {
+    const size = PlayerConfig.width;
+    const key = 'player';
+
+    // Skip if already exists
+    if (scene.textures.exists(key)) {
+      return;
+    }
+
+    const graphics = scene.add.graphics();
+
+    // Draw player body (blue square)
+    graphics.fillStyle(0x4a90e2);
+    graphics.fillRect(0, 0, size, size);
+
+    // Draw face/visor (lighter blue)
+    graphics.fillStyle(0x7ec8e3);
+    graphics.fillRect(6, 6, size - 12, 8);
+
+    // Draw limbs (darker blue)
+    graphics.fillStyle(0x2e5c8a);
+    graphics.fillRect(2, size - 6, 6, 6); // Left leg
+    graphics.fillRect(size - 8, size - 6, 6, 6); // Right leg
+
+    // Add outline
+    graphics.lineStyle(2, 0x000000, 1);
+    graphics.strokeRect(1, 1, size - 2, size - 2);
+
+    // Generate texture
+    graphics.generateTexture(key, size, size);
+    graphics.destroy();
+
+    console.log('[TextureGenerator] Generated player sprite');
+  }
+
   /**
    * Generate a tileset texture with all tile types
    */
