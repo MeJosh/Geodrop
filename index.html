@@ -12,13 +12,113 @@
     }
 
     body {
-      background-color: #000;
+      background-color: #2A2A2A;
+      font-family: monospace;
+      color: #F5F5F5;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Bar */
+    #header {
+      background-color: #1A1A1A;
+      border-bottom: 2px solid #4A4A4A;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    #header h1 {
+      font-size: 28px;
+      color: #FFCB4A;
+      text-shadow: 2px 2px 0 #000;
+      margin: 0;
+    }
+
+    #instructions-btn {
+      background-color: #2EC5B6;
+      color: #1A1A1A;
+      border: 2px solid #1A1A1A;
+      padding: 8px 16px;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #instructions-btn:hover {
+      background-color: #3DD5C5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(46, 197, 182, 0.3);
+    }
+
+    #instructions-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Main Layout */
+    #main-layout {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* Left Sidebar */
+    #sidebar {
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .stat-box {
+      background-color: #1A1A1A;
+      border: 2px solid #4A4A4A;
+      padding: 16px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-box h3 {
+      font-size: 14px;
+      color: #B0B0B0;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFCB4A;
+    }
+
+    #depth-value {
+      color: #FF8C42;
+    }
+
+    #nuggets-value {
+      color: #FFD700;
+    }
+
+    /* Game Viewport Container */
+    #game-viewport {
+      flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      font-family: monospace;
-      color: #fff;
+      background-color: #1A1A1A;
+      border: 2px solid #4A4A4A;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     #game-container {
@@ -31,11 +131,224 @@
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
       image-rendering: crisp-edges;
+      display: block;
+    }
+
+    /* Instructions Modal */
+    #instructions-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #instructions-modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: #1A1A1A;
+      border: 3px solid #4A4A4A;
+      border-radius: 8px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content h2 {
+      color: #FFCB4A;
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .modal-content h3 {
+      color: #2EC5B6;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .modal-content p {
+      color: #F5F5F5;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .modal-content ul {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    .modal-content li {
+      color: #B0B0B0;
+      line-height: 1.8;
+    }
+
+    #close-modal {
+      background-color: #E94E3C;
+      color: #F5F5F5;
+      border: 2px solid #1A1A1A;
+      padding: 10px 24px;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto 0;
+      transition: all 0.2s;
+    }
+
+    #close-modal:hover {
+      background-color: #F95E4C;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(233, 78, 60, 0.3);
+    }
+
+    #close-modal:active {
+      transform: translateY(0);
+    }
+
+    .seed-info {
+      background-color: #2A2A2A;
+      padding: 12px;
+      border-left: 4px solid #2EC5B6;
+      margin-top: 16px;
+      font-family: monospace;
+      color: #FFCB4A;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      #main-layout {
+        flex-direction: column;
+        padding: 12px;
+        gap: 12px;
+      }
+
+      #sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+      }
+
+      .stat-box {
+        flex: 1;
+        padding: 12px;
+      }
+
+      .stat-box h3 {
+        font-size: 12px;
+      }
+
+      .stat-value {
+        font-size: 20px;
+      }
+
+      #header h1 {
+        font-size: 20px;
+      }
+
+      #instructions-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .modal-content {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="game-container"></div>
+  <!-- Header -->
+  <div id="header">
+    <h1>GeoDrop</h1>
+    <button id="instructions-btn">Instructions</button>
+  </div>
+
+  <!-- Main Layout -->
+  <div id="main-layout">
+    <!-- Left Sidebar -->
+    <div id="sidebar">
+      <div class="stat-box">
+        <h3>Depth</h3>
+        <div class="stat-value" id="depth-value">0m</div>
+      </div>
+      <div class="stat-box">
+        <h3>Nuggets</h3>
+        <div class="stat-value" id="nuggets-value">0</div>
+      </div>
+    </div>
+
+    <!-- Game Viewport -->
+    <div id="game-viewport">
+      <div id="game-container"></div>
+    </div>
+  </div>
+
+  <!-- Instructions Modal -->
+  <div id="instructions-modal">
+    <div class="modal-content">
+      <h2>How to Play</h2>
+
+      <h3>Controls</h3>
+      <ul>
+        <li><strong>Arrow Keys / WASD:</strong> Move and Jump</li>
+        <li><strong>Click/Tap & Hold:</strong> Move and Mine</li>
+      </ul>
+
+      <h3>Objective</h3>
+      <p>Explore the procedurally generated underground world, mine valuable ores, and collect golden nuggets. Watch your depth as you dig deeper!</p>
+
+      <div class="seed-info" id="seed-display">
+        World Seed: Loading...
+      </div>
+
+      <button id="close-modal">Close</button>
+    </div>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
+  <script>
+    // Modal controls
+    const modal = document.getElementById('instructions-modal');
+    const instructionsBtn = document.getElementById('instructions-btn');
+    const closeBtn = document.getElementById('close-modal');
+
+    instructionsBtn.addEventListener('click', () => {
+      modal.classList.add('active');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+
+    // Expose UI update functions globally for Phaser scene
+    window.updateDepth = (depth) => {
+      document.getElementById('depth-value').textContent = depth + 'm';
+    };
+
+    window.updateNuggets = (count) => {
+      document.getElementById('nuggets-value').textContent = count;
+    };
+
+    window.setSeed = (seed) => {
+      document.getElementById('seed-display').textContent = 'World Seed: ' + seed;
+    };
+  </script>
 </body>
 </html>
