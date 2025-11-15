@@ -57,9 +57,28 @@ export class TilemapSystem {
    * Create a tile sprite with connected textures and variations
    */
   private createTileSprite(x: number, y: number, tileType: TileType): void {
-    // Generate random variation for this tile (0-7 for more diversity)
-    const variation = Math.floor(Math.random() * 8);
+    // Generate deterministic variation based on seed and position (0-7)
+    const variation = this.calculateVariation(x, y);
     this.createTileSpriteWithVariation(x, y, tileType, variation);
+  }
+
+  /**
+   * Calculate a deterministic variation index based on world seed and tile position
+   * Uses a simple hash function to ensure consistent variations per seed
+   */
+  private calculateVariation(x: number, y: number): number {
+    const seed = this.worldData.seed;
+
+    // Simple hash function combining seed and position
+    // This ensures the same seed + position always gives the same variation
+    let hash = seed;
+    hash = ((hash << 5) - hash) + x;
+    hash = hash & hash; // Convert to 32-bit integer
+    hash = ((hash << 5) - hash) + y;
+    hash = hash & hash;
+
+    // Map to 0-7 range
+    return Math.abs(hash) % 8;
   }
 
   /**
