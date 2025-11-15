@@ -118,14 +118,16 @@ export class PlayerSystem {
     // Reset grounded state
     this.state.isGrounded = false;
 
-    // Check if there's a solid tile just below the player (within 2 pixels)
-    const feetY = Math.floor((bottom + 2) / WorldConfig.tileHeight);
+    // Check if there's a solid tile just below the player (within 1 pixel and moving down or stationary)
+    const feetY = Math.floor((bottom + 1) / WorldConfig.tileHeight);
     const leftFootX = Math.floor((left + 2) / WorldConfig.tileWidth);
     const rightFootX = Math.floor((right - 2) / WorldConfig.tileWidth);
 
+    // Only consider grounded if we're moving down or nearly stationary vertically
     if (
-      this.tilemapSystem.isSolid(leftFootX, feetY) ||
-      this.tilemapSystem.isSolid(rightFootX, feetY)
+      body.velocity.y >= -0.5 &&
+      (this.tilemapSystem.isSolid(leftFootX, feetY) ||
+        this.tilemapSystem.isSolid(rightFootX, feetY))
     ) {
       this.state.isGrounded = true;
     }
@@ -135,6 +137,10 @@ export class PlayerSystem {
     const maxTileX = Math.floor(right / WorldConfig.tileWidth);
     const minTileY = Math.floor(top / WorldConfig.tileHeight);
     const maxTileY = Math.floor(bottom / WorldConfig.tileHeight);
+
+    // Find the tile with the most overlap to resolve (prevents fighting between multiple tiles)
+    let maxOverlap = 0;
+    let bestResolution: { dx: number; dy: number; stopVelocityX: boolean; stopVelocityY: boolean } | null = null;
 
     // Check all tiles player is overlapping
     for (let ty = minTileY; ty <= maxTileY; ty++) {
@@ -150,35 +156,48 @@ export class PlayerSystem {
           const overlapX = Math.min(right - tileLeft, tileRight - left);
           const overlapY = Math.min(bottom - tileTop, tileBottom - top);
 
-          // Only resolve if there's actual overlap (with small threshold to avoid jitter)
+          // Only consider if there's actual overlap (with small threshold to avoid jitter)
           if (overlapX > 0.5 && overlapY > 0.5) {
-            // Resolve on the axis with least penetration
-            if (overlapX < overlapY) {
-              // Resolve horizontally
-              if (centerX < tileLeft + WorldConfig.tileWidth / 2) {
-                // Player is on left side of tile
-                this.sprite.x -= overlapX;
+            const totalOverlap = overlapX * overlapY;
+
+            // Only resolve the collision with the largest overlap area
+            if (totalOverlap > maxOverlap) {
+              maxOverlap = totalOverlap;
+
+              // Determine resolution direction
+              if (overlapX < overlapY) {
+                // Resolve horizontally
+                if (centerX < tileLeft + WorldConfig.tileWidth / 2) {
+                  bestResolution = { dx: -overlapX, dy: 0, stopVelocityX: true, stopVelocityY: false };
+                } else {
+                  bestResolution = { dx: overlapX, dy: 0, stopVelocityX: true, stopVelocityY: false };
+                }
               } else {
-                // Player is on right side of tile
-                this.sprite.x += overlapX;
-              }
-              body.setVelocityX(0);
-            } else {
-              // Resolve vertically
-              if (centerY < tileTop + WorldConfig.tileHeight / 2) {
-                // Player is above tile (hitting ceiling)
-                this.sprite.y -= overlapY;
-                body.setVelocityY(0);
-              } else {
-                // Player is below tile (standing on it)
-                this.sprite.y += overlapY;
-                if (body.velocity.y > 0) {
-                  body.setVelocityY(0);
+                // Resolve vertically
+                if (centerY < tileTop + WorldConfig.tileHeight / 2) {
+                  // Player is above tile (hitting ceiling)
+                  bestResolution = { dx: 0, dy: -overlapY, stopVelocityX: false, stopVelocityY: true };
+                } else {
+                  // Player is below tile (standing on it)
+                  bestResolution = { dx: 0, dy: overlapY, stopVelocityX: false, stopVelocityY: true };
                 }
               }
             }
           }
         }
+      }
+    }
+
+    // Apply the best resolution (only one per frame)
+    if (bestResolution) {
+      this.sprite.x += bestResolution.dx;
+      this.sprite.y += bestResolution.dy;
+
+      if (bestResolution.stopVelocityX) {
+        body.setVelocityX(0);
+      }
+      if (bestResolution.stopVelocityY) {
+        body.setVelocityY(0);
       }
     }
   }
