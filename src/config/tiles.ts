@@ -15,7 +15,8 @@ export interface TileDefinition {
   type: 'empty' | 'dirt' | 'stone' | 'ore' | 'bedrock';
   hardness: number;
   solid: boolean;
-  color: number; // Temporary color until we have textures
+  color: number; // Base color for texture generation
+  connectedTexture: boolean; // Use 9-slice connected textures
 }
 
 /**
@@ -29,6 +30,7 @@ export const TileRegistry: Record<TileType, TileDefinition> = {
     hardness: 0,
     solid: false,
     color: 0x000000,
+    connectedTexture: false,
   },
   [TileType.DIRT]: {
     id: TileType.DIRT,
@@ -37,6 +39,7 @@ export const TileRegistry: Record<TileType, TileDefinition> = {
     hardness: 1,
     solid: true,
     color: 0x8b5a3c,
+    connectedTexture: true, // Enable connected textures for dirt
   },
   [TileType.STONE]: {
     id: TileType.STONE,
@@ -45,6 +48,7 @@ export const TileRegistry: Record<TileType, TileDefinition> = {
     hardness: 3,
     solid: true,
     color: 0x777777,
+    connectedTexture: false,
   },
   [TileType.ORE]: {
     id: TileType.ORE,
@@ -53,6 +57,7 @@ export const TileRegistry: Record<TileType, TileDefinition> = {
     hardness: 5,
     solid: true,
     color: 0xffd700,
+    connectedTexture: false,
   },
   [TileType.BEDROCK]: {
     id: TileType.BEDROCK,
@@ -61,5 +66,6 @@ export const TileRegistry: Record<TileType, TileDefinition> = {
     hardness: 999,
     solid: true,
     color: 0x222222,
+    connectedTexture: false,
   },
 };

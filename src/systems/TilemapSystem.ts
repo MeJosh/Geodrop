@@ -3,6 +3,7 @@ import { WorldConfig } from '@/config/world';
 import { TileType, TileRegistry } from '@/config/tiles';
 import { TileGrid } from '@/types/TileTypes';
 import { WorldData } from '@/types/WorldTypes';
+import { TextureGenerator } from '@/utils/TextureGenerator';
 
 /**
  * TilemapSystem - Manages the game world tilemap
@@ -13,6 +14,7 @@ export class TilemapSystem {
   private worldData: WorldData;
   private tileSprites: Map<string, Phaser.GameObjects.Image> = new Map();
   private tilesContainer: Phaser.GameObjects.Container;
+  private tileVariations: Map<string, number> = new Map(); // Store random variations per tile
 
   constructor(scene: Phaser.Scene, worldData: WorldData) {
     this.scene = scene;
@@ -45,20 +47,65 @@ export class TilemapSystem {
         // Skip empty tiles
         if (tileType === TileType.EMPTY) continue;
 
-        // Create sprite for this tile
-        const key = `tile_${tileType}`;
-        const sprite = this.scene.add.image(
-          x * tileWidth + tileWidth / 2,
-          y * tileHeight + tileHeight / 2,
-          key
-        );
-        sprite.setOrigin(0.5);
-
-        // Store sprite reference
-        this.tileSprites.set(`${x},${y}`, sprite);
-        this.tilesContainer.add(sprite);
+        // Create sprite for this tile with appropriate texture
+        this.createTileSprite(x, y, tileType);
       }
     }
+  }
+
+  /**
+   * Create a tile sprite with connected textures and variations
+   */
+  private createTileSprite(x: number, y: number, tileType: TileType): void {
+    const { tileWidth, tileHeight } = WorldConfig;
+    const tileDef = TileRegistry[tileType];
+
+    // Generate random variation for this tile (0-2)
+    const variation = Math.floor(Math.random() * 3);
+    this.tileVariations.set(`${x},${y}`, variation);
+
+    // Get texture key based on whether it uses connected textures
+    let textureKey: string;
+    if (tileDef.connectedTexture) {
+      // Calculate bitmask based on neighbors
+      const bitmask = TextureGenerator.calculateBitmask(x, y, (nx, ny) => {
+        return this.shouldConnect(nx, ny, tileType);
+      });
+      textureKey = `tile_${tileType}_${bitmask}_var${variation}`;
+    } else {
+      textureKey = `tile_${tileType}_var${variation}`;
+    }
+
+    // Create sprite
+    const sprite = this.scene.add.image(
+      x * tileWidth + tileWidth / 2,
+      y * tileHeight + tileHeight / 2,
+      textureKey
+    );
+    sprite.setOrigin(0.5);
+
+    // Store sprite reference
+    this.tileSprites.set(`${x},${y}`, sprite);
+    this.tilesContainer.add(sprite);
+  }
+
+  /**
+   * Check if a neighbor tile should connect to the given tile type
+   */
+  private shouldConnect(x: number, y: number, sourceTileType: TileType): boolean {
+    const neighborType = this.getTileAt(x, y);
+    if (neighborType === null) return false;
+
+    // Get tile definitions
+    const sourcesDef = TileRegistry[sourceTileType];
+    const neighborDef = TileRegistry[neighborType];
+
+    // Both tiles must be solid to connect
+    if (!sourcesDef.solid || !neighborDef.solid) return false;
+
+    // Allow different types to connect if both use connected textures
+    // This creates smooth blending between different solid tile types
+    return sourcesDef.connectedTexture || neighborDef.connectedTexture;
   }
 
   /**
@@ -78,11 +125,50 @@ export class TilemapSystem {
     // Remove sprite
     sprite.destroy();
     this.tileSprites.delete(key);
+    this.tileVariations.delete(key);
 
     // Update world data
     this.worldData.tiles[y][x] = TileType.EMPTY;
 
+    // Update neighboring connected textures
+    this.updateNeighborConnections(x, y);
+
     return true;
+  }
+
+  /**
+   * Update connected textures for neighboring tiles
+   */
+  private updateNeighborConnections(centerX: number, centerY: number): void {
+    // Check all 8 neighbors
+    const neighbors = [
+      { x: centerX - 1, y: centerY - 1 }, // NW
+      { x: centerX, y: centerY - 1 },     // N
+      { x: centerX + 1, y: centerY - 1 }, // NE
+      { x: centerX - 1, y: centerY },     // W
+      { x: centerX + 1, y: centerY },     // E
+      { x: centerX - 1, y: centerY + 1 }, // SW
+      { x: centerX, y: centerY + 1 },     // S
+      { x: centerX + 1, y: centerY + 1 }, // SE
+    ];
+
+    neighbors.forEach(({ x, y }) => {
+      const tileType = this.getTileAt(x, y);
+      if (tileType === null || tileType === TileType.EMPTY) return;
+
+      const tileDef = TileRegistry[tileType];
+      if (!tileDef.connectedTexture) return;
+
+      // Recreate the sprite with updated connections
+      const key = `${x},${y}`;
+      const existingSprite = this.tileSprites.get(key);
+      if (existingSprite) {
+        existingSprite.destroy();
+        this.tileSprites.delete(key);
+      }
+
+      this.createTileSprite(x, y, tileType);
+    });
   }
 
   /**
