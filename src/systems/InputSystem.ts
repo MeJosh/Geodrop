@@ -54,13 +54,18 @@ export class InputSystem {
       return this.getEmptyInput();
     }
 
+    // Movement is exclusive with mining
+    const isMovingLeft = this.cursors.left.isDown || this.wasd.A.isDown;
+    const isMovingRight = this.cursors.right.isDown || this.wasd.D.isDown;
+    const isMovingDown = this.cursors.down.isDown || this.wasd.S.isDown;
+
     return {
-      left: this.cursors.left.isDown || this.wasd.A.isDown,
-      right: this.cursors.right.isDown || this.wasd.D.isDown,
+      left: isMovingLeft,
+      right: isMovingRight,
       jump: this.cursors.up.isDown || this.wasd.W.isDown || this.spaceKey.isDown,
-      mineDown: this.cursors.down.isDown || this.wasd.S.isDown,
-      mineLeft: false, // TODO: Implement mining controls
-      mineRight: false, // TODO: Implement mining controls
+      mineDown: isMovingDown,
+      mineLeft: isMovingLeft,
+      mineRight: isMovingRight,
     };
   }
 

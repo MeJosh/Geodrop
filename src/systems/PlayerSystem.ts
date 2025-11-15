@@ -222,4 +222,19 @@ export class PlayerSystem {
   getPosition(): { x: number; y: number } {
     return { x: this.state.x, y: this.state.y };
   }
+
+  /**
+   * Get player center position for mining calculations
+   */
+  getCenterPosition(): { x: number; y: number } {
+    if (!this.sprite || !this.sprite.body) {
+      return { x: this.state.x, y: this.state.y };
+    }
+
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    return {
+      x: body.x + body.width / 2,
+      y: body.y + body.height / 2,
+    };
+  }
 }

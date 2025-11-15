@@ -6,6 +6,7 @@ import { GenerationSystem } from '@/systems/GenerationSystem';
 import { TilemapSystem } from '@/systems/TilemapSystem';
 import { PlayerSystem } from '@/systems/PlayerSystem';
 import { InputSystem } from '@/systems/InputSystem';
+import { MiningSystem } from '@/systems/MiningSystem';
 
 /**
  * MainScene - Main gameplay scene
@@ -16,6 +17,7 @@ export class MainScene extends Phaser.Scene {
   private generationSystem?: GenerationSystem;
   private playerSystem?: PlayerSystem;
   private inputSystem?: InputSystem;
+  private miningSystem?: MiningSystem;
 
   constructor() {
     super({ key: SceneKeys.MAIN });
@@ -49,6 +51,10 @@ export class MainScene extends Phaser.Scene {
     this.playerSystem = new PlayerSystem(this, this.tilemapSystem);
     this.playerSystem.create();
 
+    // Create mining system
+    this.miningSystem = new MiningSystem(this, this.tilemapSystem);
+    this.miningSystem.create();
+
     // Set camera bounds
     this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
 
@@ -63,7 +69,7 @@ export class MainScene extends Phaser.Scene {
     const titleText = this.add.text(
       this.cameras.main.centerX,
       50,
-      'GeoDrop - Phase 3 Complete!',
+      'GeoDrop - Phase 4 Complete!',
       {
         fontSize: '32px',
         color: '#00ff00',
@@ -79,7 +85,8 @@ export class MainScene extends Phaser.Scene {
     const instructions = this.add.text(
       this.cameras.main.centerX,
       100,
-      'Arrow Keys / WASD: Move & Jump\nWorld Seed: ' + this.generationSystem.getSeed(),
+      'Arrow Keys / WASD: Move & Jump\nHold Direction: Mine Tiles\nWorld Seed: ' +
+        this.generationSystem.getSeed(),
       {
         fontSize: '16px',
         color: '#ffffff',
@@ -91,11 +98,21 @@ export class MainScene extends Phaser.Scene {
     instructions.setScrollFactor(0);
   }
 
-  update(_time: number, _delta: number): void {
+  update(_time: number, delta: number): void {
+    // Get input
+    if (!this.inputSystem) return;
+    const input = this.inputSystem.getInput();
+
     // Update player with input
-    if (this.playerSystem && this.inputSystem) {
-      const input = this.inputSystem.getInput();
+    if (this.playerSystem) {
       this.playerSystem.update(input);
+    }
+
+    // Update mining system
+    if (this.miningSystem && this.playerSystem) {
+      const playerPos = this.playerSystem.getCenterPosition();
+      const playerState = this.playerSystem.getState();
+      this.miningSystem.update(input, playerPos.x, playerPos.y, playerState.isGrounded, delta);
     }
   }
 
