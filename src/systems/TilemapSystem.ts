@@ -38,8 +38,6 @@ export class TilemapSystem {
    * Populate the tilemap with tile data using sprites
    */
   private populateTilemap(tiles: TileGrid): void {
-    const { tileWidth, tileHeight } = WorldConfig;
-
     for (let y = 0; y < tiles.length; y++) {
       for (let x = 0; x < tiles[y].length; x++) {
         const tileType = tiles[y][x];

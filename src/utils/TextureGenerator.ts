@@ -81,7 +81,6 @@ export class TextureGenerator {
    */
   private static generateStandardTile(scene: Phaser.Scene, tileType: TileType): void {
     const tileSize = WorldConfig.tileWidth;
-    const tileDef = TileRegistry[tileType];
     const generator = this.getTileGenerator(tileType);
 
     // Generate base texture
