@@ -93,8 +93,8 @@ export class TextureGenerator {
       graphics.destroy();
     }
 
-    // Generate variation textures (3 variations per tile type)
-    for (let variation = 0; variation < 3; variation++) {
+    // Generate variation textures (8 variations per tile type for more diversity)
+    for (let variation = 0; variation < 8; variation++) {
       const varKey = `tile_${tileType}_var${variation}`;
       if (!scene.textures.exists(varKey)) {
         const graphics = scene.add.graphics();
@@ -124,8 +124,8 @@ export class TextureGenerator {
         graphics.destroy();
       }
 
-      // Generate variations for this bitmask
-      for (let variation = 0; variation < 3; variation++) {
+      // Generate variations for this bitmask (8 variations for more diversity)
+      for (let variation = 0; variation < 8; variation++) {
         const varKey = `tile_${tileType}_${bitmask}_var${variation}`;
         if (!scene.textures.exists(varKey)) {
           const graphics = scene.add.graphics();
@@ -253,17 +253,19 @@ export class TextureGenerator {
     graphics.fillStyle(baseColor);
     graphics.fillRect(0, 0, size, size);
 
-    // Add very subtle texture with slight variation in position
+    // Add very subtle texture with variation-based positioning
     graphics.fillStyle(darkColor, 0.15);
 
-    // Use variation to slightly offset the subtle texture, but keep it minimal
-    const offset = variation * 0.5;
-    graphics.fillRect(offset, offset, size / 3, size / 3);
-    graphics.fillRect(size / 2 + offset, size / 2 + offset, size / 3, size / 3);
+    // Use variation to create different texture patterns
+    const offsetX = ((variation * 3) % size) * 0.3;
+    const offsetY = ((variation * 5) % size) * 0.3;
+    graphics.fillRect(offsetX, offsetY, size / 3, size / 3);
+    graphics.fillRect(size / 2 + offsetX, size / 2 + offsetY, size / 3, size / 3);
 
-    // Add extremely subtle noise for texture depth
+    // Add extremely subtle noise for texture depth with variation-based positions
     graphics.fillStyle(darkColor, 0.05);
-    for (let i = 0; i < 3; i++) {
+    const noiseCount = 3 + (variation % 3); // 3-5 noise dots
+    for (let i = 0; i < noiseCount; i++) {
       const x = ((i * 7 + variation * 11) % size);
       const y = ((i * 13 + variation * 17) % size);
       graphics.fillCircle(x, y, 0.5);
@@ -286,19 +288,23 @@ export class TextureGenerator {
     graphics.fillStyle(baseColor);
     graphics.fillRect(0, 0, size, size);
 
-    // Add very subtle darker texture
+    // Add very subtle darker texture with variation-based positioning
     graphics.fillStyle(darkColor, 0.15);
-    const offset = variation * 0.5;
-    graphics.fillRect(offset + 2, offset + 2, size / 3, size / 3);
-    graphics.fillRect(size / 2 + offset, size / 2 + offset, size / 3, size / 3);
+    const offsetX = ((variation * 3) % size) * 0.3;
+    const offsetY = ((variation * 7) % size) * 0.3;
+    graphics.fillRect(offsetX + 2, offsetY + 2, size / 3, size / 3);
+    graphics.fillRect(size / 2 + offsetX, size / 2 + offsetY, size / 3, size / 3);
 
-    // Add very subtle lighter highlights
+    // Add very subtle lighter highlights with variation-based positioning
     graphics.fillStyle(lightColor, 0.1);
-    graphics.fillCircle(size / 2 + offset, size / 2 - offset, size / 5);
+    const highlightX = size / 2 + ((variation * 2) % size) * 0.2;
+    const highlightY = size / 2 - ((variation * 4) % size) * 0.2;
+    graphics.fillCircle(highlightX, highlightY, size / 5);
 
-    // Add extremely subtle noise for texture depth
+    // Add extremely subtle noise for texture depth with variation-based count
     graphics.fillStyle(darkColor, 0.05);
-    for (let i = 0; i < 3; i++) {
+    const noiseCount = 3 + (variation % 3); // 3-5 noise dots
+    for (let i = 0; i < noiseCount; i++) {
       const x = ((i * 11 + variation * 13) % size);
       const y = ((i * 17 + variation * 19) % size);
       graphics.fillCircle(x, y, 0.5);
@@ -307,28 +313,108 @@ export class TextureGenerator {
 
   /**
    * Custom generator for ore tiles
+   * Draws background tile (stone-like) with 2-3 ore nuggets
    */
   private static generateOreTile(
     graphics: Phaser.GameObjects.Graphics,
     size: number,
     variation: number = 0
   ): void {
-    const baseColor = 0xffd700;
+    // Draw stone-like background with variation
+    const baseColor = 0x777777;
+    const darkColor = 0x555555;
+    const lightColor = 0x999999;
 
-    // Base fill
     graphics.fillStyle(baseColor);
     graphics.fillRect(0, 0, size, size);
 
-    // Add ore sparkles at different positions based on variation
-    const offset = variation * 2;
-    graphics.fillStyle(0xffaa00);
-    graphics.fillCircle(size / 4 + offset, size / 4 + offset, 3);
-    graphics.fillCircle((3 * size) / 4 - offset, (3 * size) / 4 - offset, 3);
-    graphics.fillCircle((3 * size) / 4 + offset, size / 4 - offset, 2);
+    // Add subtle stone texture with variation-based positioning
+    graphics.fillStyle(darkColor, 0.15);
+    const offsetX = ((variation * 3) % size) * 0.3;
+    const offsetY = ((variation * 7) % size) * 0.3;
+    graphics.fillRect(offsetX + 2, offsetY + 2, size / 3, size / 3);
+    graphics.fillRect(size / 2 + offsetX, size / 2 + offsetY, size / 3, size / 3);
 
-    // Add border
-    graphics.lineStyle(1, 0x000000, 0.2);
-    graphics.strokeRect(0, 0, size, size);
+    graphics.fillStyle(lightColor, 0.1);
+    const highlightX = size / 2 + ((variation * 2) % size) * 0.2;
+    const highlightY = size / 2 - ((variation * 4) % size) * 0.2;
+    graphics.fillCircle(highlightX, highlightY, size / 5);
+
+    // Determine number of nuggets based on variation (2-3)
+    const nuggetCount = 2 + (variation % 2); // variation 0,2,4,6 = 2 nuggets, variation 1,3,5,7 = 3 nuggets
+
+    // Generate nugget positions that are spread out and not too close to edges
+    const nuggetPositions = this.generateNuggetPositions(size, nuggetCount, variation);
+
+    // Draw ore nuggets (larger size)
+    const oreColor = 0xffd700;
+    const oreDarkColor = 0xffaa00;
+
+    nuggetPositions.forEach((pos, index) => {
+      // Create slightly irregular oval shapes with larger base size
+      const radiusX = 4 + (((index * 7 + variation * 11) % 10) / 10) * 3;
+      const radiusY = 4 + (((index * 13 + variation * 17) % 10) / 10) * 3;
+
+      // Draw main nugget
+      graphics.fillStyle(oreColor);
+      graphics.fillEllipse(pos.x, pos.y, radiusX, radiusY);
+
+      // Add darker center for depth
+      graphics.fillStyle(oreDarkColor, 0.5);
+      graphics.fillEllipse(pos.x, pos.y, radiusX * 0.6, radiusY * 0.6);
+    });
+  }
+
+  /**
+   * Generate positions for ore nuggets that are spread out and not too close to edges
+   */
+  private static generateNuggetPositions(
+    size: number,
+    count: number,
+    variation: number
+  ): { x: number; y: number }[] {
+    const positions: { x: number; y: number }[] = [];
+    const minDistanceFromEdge = size * 0.2; // Keep nuggets at least 20% from edge
+    const minDistanceBetween = size * 0.3; // Keep nuggets at least 30% apart
+
+    // Create a grid-based approach with random offsets for even distribution
+    const gridSize = Math.ceil(Math.sqrt(count));
+    const cellSize = (size - 2 * minDistanceFromEdge) / gridSize;
+
+    let nuggetIndex = 0;
+    for (let i = 0; i < gridSize && nuggetIndex < count; i++) {
+      for (let j = 0; j < gridSize && nuggetIndex < count; j++) {
+        // Base position in grid cell
+        const baseX = minDistanceFromEdge + i * cellSize + cellSize / 2;
+        const baseY = minDistanceFromEdge + j * cellSize + cellSize / 2;
+
+        // Add random offset within cell (using variation for deterministic randomness)
+        const offsetX = ((nuggetIndex * 7 + variation * 11) % 100 - 50) / 100 * cellSize * 0.4;
+        const offsetY = ((nuggetIndex * 13 + variation * 17) % 100 - 50) / 100 * cellSize * 0.4;
+
+        const x = baseX + offsetX;
+        const y = baseY + offsetY;
+
+        // Check if position is valid (not too close to other nuggets)
+        let validPosition = true;
+        for (const existingPos of positions) {
+          const distance = Math.sqrt(
+            Math.pow(x - existingPos.x, 2) + Math.pow(y - existingPos.y, 2)
+          );
+          if (distance < minDistanceBetween) {
+            validPosition = false;
+            break;
+          }
+        }
+
+        if (validPosition) {
+          positions.push({ x, y });
+          nuggetIndex++;
+        }
+      }
+    }
+
+    return positions;
   }
 
   /**

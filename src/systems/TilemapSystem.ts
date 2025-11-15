@@ -57,11 +57,19 @@ export class TilemapSystem {
    * Create a tile sprite with connected textures and variations
    */
   private createTileSprite(x: number, y: number, tileType: TileType): void {
+    // Generate random variation for this tile (0-7 for more diversity)
+    const variation = Math.floor(Math.random() * 8);
+    this.createTileSpriteWithVariation(x, y, tileType, variation);
+  }
+
+  /**
+   * Create a tile sprite with a specific variation (used when preserving appearance)
+   */
+  private createTileSpriteWithVariation(x: number, y: number, tileType: TileType, variation: number): void {
     const { tileWidth, tileHeight } = WorldConfig;
     const tileDef = TileRegistry[tileType];
 
-    // Generate random variation for this tile (0-2)
-    const variation = Math.floor(Math.random() * 3);
+    // Store the variation
     this.tileVariations.set(`${x},${y}`, variation);
 
     // Get texture key based on whether it uses connected textures
@@ -159,7 +167,7 @@ export class TilemapSystem {
       const tileDef = TileRegistry[tileType];
       if (!tileDef.connectedTexture) return;
 
-      // Recreate the sprite with updated connections
+      // Recreate the sprite with updated connections, preserving the variation
       const key = `${x},${y}`;
       const existingSprite = this.tileSprites.get(key);
       if (existingSprite) {
@@ -167,7 +175,14 @@ export class TilemapSystem {
         this.tileSprites.delete(key);
       }
 
-      this.createTileSprite(x, y, tileType);
+      // Preserve the existing variation (or use existing one if already stored)
+      const existingVariation = this.tileVariations.get(key);
+      if (existingVariation !== undefined) {
+        // Use the existing variation to maintain consistent appearance
+        this.createTileSpriteWithVariation(x, y, tileType, existingVariation);
+      } else {
+        this.createTileSprite(x, y, tileType);
+      }
     });
   }
 

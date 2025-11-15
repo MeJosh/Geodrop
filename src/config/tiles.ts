@@ -57,7 +57,7 @@ export const TileRegistry: Record<TileType, TileDefinition> = {
     hardness: 5,
     solid: true,
     color: 0xffd700,
-    connectedTexture: false,
+    connectedTexture: true, // Enable connected textures for ore
   },
   [TileType.BEDROCK]: {
     id: TileType.BEDROCK,
