@@ -279,23 +279,30 @@ export class TextureGenerator {
     variation: number = 0
   ): void {
     const baseColor = 0x777777;
+    const darkColor = 0x555555;
+    const lightColor = 0x999999;
 
     // Base fill
     graphics.fillStyle(baseColor);
     graphics.fillRect(0, 0, size, size);
 
-    // Add stone texture
-    graphics.fillStyle(0x555555, 0.4);
-    graphics.fillRect(4, 4, size - 8, size - 8);
+    // Add very subtle darker texture
+    graphics.fillStyle(darkColor, 0.15);
+    const offset = variation * 0.5;
+    graphics.fillRect(offset + 2, offset + 2, size / 3, size / 3);
+    graphics.fillRect(size / 2 + offset, size / 2 + offset, size / 3, size / 3);
 
-    // Add variation
-    const offset = variation * 2;
-    graphics.fillStyle(0x999999, 0.3);
-    graphics.fillCircle(size / 2 + offset, size / 2 - offset, size / 4);
+    // Add very subtle lighter highlights
+    graphics.fillStyle(lightColor, 0.1);
+    graphics.fillCircle(size / 2 + offset, size / 2 - offset, size / 5);
 
-    // Add border
-    graphics.lineStyle(1, 0x000000, 0.2);
-    graphics.strokeRect(0, 0, size, size);
+    // Add extremely subtle noise for texture depth
+    graphics.fillStyle(darkColor, 0.05);
+    for (let i = 0; i < 3; i++) {
+      const x = ((i * 11 + variation * 13) % size);
+      const y = ((i * 17 + variation * 19) % size);
+      graphics.fillCircle(x, y, 0.5);
+    }
   }
 
   /**

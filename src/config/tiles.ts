@@ -48,7 +48,7 @@ export const TileRegistry: Record<TileType, TileDefinition> = {
     hardness: 3,
     solid: true,
     color: 0x777777,
-    connectedTexture: false,
+    connectedTexture: true, // Enable connected textures for stone
   },
   [TileType.ORE]: {
     id: TileType.ORE,
