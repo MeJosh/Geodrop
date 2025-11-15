@@ -118,17 +118,20 @@ export class PlayerSystem {
     // Reset grounded state
     this.state.isGrounded = false;
 
-    // Check if there's a solid tile just below the player (within 1 pixel and moving down or stationary)
+    // Check if there's a solid tile just below the player (within 1 pixel)
     const feetY = Math.floor((bottom + 1) / WorldConfig.tileHeight);
     const leftFootX = Math.floor((left + 2) / WorldConfig.tileWidth);
     const rightFootX = Math.floor((right - 2) / WorldConfig.tileWidth);
 
-    // Only consider grounded if we're moving down or nearly stationary vertically
-    if (
-      body.velocity.y >= -0.5 &&
-      (this.tilemapSystem.isSolid(leftFootX, feetY) ||
-        this.tilemapSystem.isSolid(rightFootX, feetY))
-    ) {
+    // Check if there's ground below
+    const hasGroundBelow = this.tilemapSystem.isSolid(leftFootX, feetY) ||
+                           this.tilemapSystem.isSolid(rightFootX, feetY);
+
+    // Only consider grounded if:
+    // 1. There's a solid tile below at least one foot
+    // 2. Not moving upward significantly (velocity.y >= -0.5)
+    // This allows grounded when standing or falling down, but not when jumping up
+    if (hasGroundBelow && body.velocity.y >= -0.5) {
       this.state.isGrounded = true;
     }
 

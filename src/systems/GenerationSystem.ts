@@ -67,6 +67,11 @@ export class GenerationSystem {
    * Generate a single tile based on depth and position
    */
   private generateTileAt(x: number, y: number, surfaceDepth: number, dirtDepth: number): TileType {
+    // Bedrock at bottom - always solid, checked first
+    if (y >= this.params.height - 2) {
+      return TileType.BEDROCK;
+    }
+
     // Surface layer - mostly air
     if (y < surfaceDepth) {
       return TileType.EMPTY;
@@ -99,11 +104,6 @@ export class GenerationSystem {
     // Ore veins in stone
     if (this.rng.nextBool(0.05)) {
       return TileType.ORE;
-    }
-
-    // Bedrock at bottom
-    if (y >= this.params.height - 2) {
-      return TileType.BEDROCK;
     }
 
     return TileType.STONE;

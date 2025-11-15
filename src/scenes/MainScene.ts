@@ -69,7 +69,7 @@ export class MainScene extends Phaser.Scene {
     const titleText = this.add.text(
       this.cameras.main.centerX,
       50,
-      'GeoDrop - Phase 4 Complete!',
+      'GeoDrop',
       {
         fontSize: '32px',
         color: '#00ff00',
