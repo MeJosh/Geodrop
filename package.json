@@ -1,0 +1,19 @@
+{
+  "name": "geodrop",
+  "version": "0.1.0",
+  "description": "2D procedurally generated mining game built with Phaser 3",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "phaser": "^3.87.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.1"
+  }
+}
